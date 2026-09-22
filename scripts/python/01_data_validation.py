@@ -78,6 +78,7 @@ required_variables = [
     "DOV_USE4_W144",
     "DOV_ASKFB_W144",
     "DOV_ASKIG_W144",
+    "XRAND_FB_IG_W144",
 
     # Banners
     "F_AGECAT",

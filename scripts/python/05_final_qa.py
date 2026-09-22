@@ -43,6 +43,8 @@ PLAN_PATH = (
     PROJECT_ROOT / "tabulation" / "tabulation_plan.csv"
 )
 
+TABLE_DIR = PROJECT_ROOT / "output" / "tables"
+
 QA_DIR = PROJECT_ROOT / "qa"
 QA_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -69,11 +71,18 @@ SMALL_BASE_PATH = (
 
 VALID_RESPONSES = [1, 2, 3]
 
+RESPONSE_LABELS = {
+    1: "Major reason",
+    2: "Minor reason",
+    3: "Not a reason",
+}
+
 MIN_TEST_BASE = 100
 VERY_SMALL_BASE_LIMIT = 30
 SMALL_BASE_LIMIT = 100
 
 NUMERIC_TOLERANCE = 1e-8
+TABLE_PERCENT_TOLERANCE = 1e-6
 
 
 MEASURE_LABELS = {
@@ -272,6 +281,20 @@ def classify_base(n):
     )
 
 
+def valid_numeric_weight(values):
+    numeric = pd.to_numeric(
+        values,
+        errors="coerce",
+    )
+
+    return (
+        numeric,
+        numeric.notna()
+        & np.isfinite(numeric)
+        & numeric.gt(0),
+    )
+
+
 # ============================================================
 # BASIC INPUT QA
 # ============================================================
@@ -310,12 +333,32 @@ for _, row in plan.iterrows():
 
     eligible_n = len(eligible)
 
-    valid_mask = (
-        eligible[variable].isin(
-            VALID_RESPONSES
+    outcome_numeric = pd.to_numeric(
+        eligible[variable],
+        errors="coerce",
+    )
+    outcome_present = eligible[variable].notna()
+    substantive = outcome_numeric.isin(VALID_RESPONSES)
+    special_99 = outcome_numeric.eq(99)
+    missing_outcome = ~outcome_present
+    unexpected_outcome = (
+        outcome_present
+        & ~outcome_numeric.isin(
+            VALID_RESPONSES + [99]
         )
-        &
+    )
+    numeric_weight, weight_valid = valid_numeric_weight(
+        eligible[weight]
+    )
+    missing_weight = eligible[weight].isna()
+    invalid_weight = (
         eligible[weight].notna()
+        & ~weight_valid
+    )
+
+    valid_mask = (
+        substantive
+        & weight_valid
     )
 
     valid = eligible.loc[
@@ -324,12 +367,8 @@ for _, row in plan.iterrows():
 
     valid_n = len(valid)
 
-    special_or_invalid_n = (
-        eligible_n - valid_n
-    )
-
     weighted_base = (
-        valid[weight].sum()
+        numeric_weight.loc[valid_mask].sum()
     )
 
     percentages = []
@@ -338,9 +377,9 @@ for _, row in plan.iterrows():
 
         for response in VALID_RESPONSES:
 
-            numerator = valid.loc[
-                valid[variable] == response,
-                weight,
+            numerator = numeric_weight.loc[
+                valid_mask
+                & outcome_numeric.eq(response)
             ].sum()
 
             percentages.append(
@@ -372,9 +411,19 @@ for _, row in plan.iterrows():
         "variable": variable,
         "weight": weight,
         "eligible_n": eligible_n,
+        "substantive_response_n": int(substantive.sum()),
         "valid_n": valid_n,
-        "special_or_invalid_n":
-            special_or_invalid_n,
+        "special_99_n": int(special_99.sum()),
+        "missing_outcome_n": int(missing_outcome.sum()),
+        "unexpected_response_n": int(
+            unexpected_outcome.sum()
+        ),
+        "missing_weight_n": int(
+            (substantive & missing_weight).sum()
+        ),
+        "invalid_weight_n": int(
+            (substantive & invalid_weight).sum()
+        ),
         "weighted_base": weighted_base,
         "percentage_qa":
             percentage_qa,
@@ -396,9 +445,146 @@ assert (
     == "PASS"
 ).all()
 
+assert qa_summary["unexpected_response_n"].eq(0).all()
+assert qa_summary["missing_weight_n"].eq(0).all()
+assert qa_summary["invalid_weight_n"].eq(0).all()
+
 print(
     "[PASS] Table-level QA rebuilt "
     "(28/28)"
+)
+
+
+# ============================================================
+# INDEPENDENT PERSISTED-TABLE RECONCILIATION
+# ============================================================
+
+reconciled_base_cells = 0
+reconciled_percentage_cells = 0
+
+for _, row in plan.iterrows():
+    table_id = row["table_id"]
+    variable = row["variable"]
+    weight = row["weight"]
+    universe_data = df.loc[
+        parse_universe(row["universe"])
+    ]
+
+    expected_columns = [
+        ("Total", None, None),
+    ]
+
+    for banner_field in [
+        "banner_1",
+        "banner_2",
+        "banner_3",
+        "banner_4",
+        "banner_5",
+    ]:
+        banner_var = str(row[banner_field]).strip()
+        banner = banner_names[banner_var]
+
+        for code, category in banner_definitions[
+            banner_var
+        ].items():
+            expected_columns.append((
+                f"{banner} | {category}",
+                banner_var,
+                code,
+            ))
+
+    table_path = TABLE_DIR / f"{table_id}.csv"
+
+    if not table_path.exists():
+        raise FileNotFoundError(
+            f"Persisted table not found: {table_path}"
+        )
+
+    saved = pd.read_csv(
+        table_path,
+        index_col=0,
+    )
+
+    expected_column_names = [
+        item[0] for item in expected_columns
+    ]
+    expected_row_names = [
+        "Unweighted Base",
+        *RESPONSE_LABELS.values(),
+    ]
+
+    assert list(saved.columns) == expected_column_names, (
+        f"{table_id}: persisted column structure differs "
+        "from the tabulation plan"
+    )
+    assert list(saved.index) == expected_row_names, (
+        f"{table_id}: persisted row structure is invalid"
+    )
+
+    for column_name, banner_var, banner_code in expected_columns:
+        subset = universe_data
+
+        if banner_var is not None:
+            subset = subset.loc[
+                subset[banner_var] == banner_code
+            ]
+
+        outcome = pd.to_numeric(
+            subset[variable],
+            errors="coerce",
+        )
+        numeric_weight, weight_valid = valid_numeric_weight(
+            subset[weight]
+        )
+        valid = (
+            outcome.isin(VALID_RESPONSES)
+            & weight_valid
+        )
+        expected_base = int(valid.sum())
+        saved_base = float(saved.loc[
+            "Unweighted Base",
+            column_name,
+        ])
+
+        assert saved_base == expected_base, (
+            f"{table_id} / {column_name}: saved base "
+            f"{saved_base} != rebuilt base {expected_base}"
+        )
+        reconciled_base_cells += 1
+
+        denominator = numeric_weight.loc[valid].sum()
+
+        for response, response_label in RESPONSE_LABELS.items():
+            numerator = numeric_weight.loc[
+                valid & outcome.eq(response)
+            ].sum()
+            expected_percentage = (
+                numerator / denominator * 100
+            )
+            saved_percentage = float(saved.loc[
+                response_label,
+                column_name,
+            ])
+
+            assert np.isclose(
+                saved_percentage,
+                expected_percentage,
+                rtol=0,
+                atol=TABLE_PERCENT_TOLERANCE,
+            ), (
+                f"{table_id} / {column_name} / "
+                f"{response_label}: saved percentage "
+                f"{saved_percentage} != rebuilt percentage "
+                f"{expected_percentage}"
+            )
+            reconciled_percentage_cells += 1
+
+assert reconciled_base_cells == 504
+assert reconciled_percentage_cells == 1512
+
+print(
+    "[PASS] Persisted tables independently reconciled "
+    "(504 bases | 1,512 percentages)"
 )
 
 

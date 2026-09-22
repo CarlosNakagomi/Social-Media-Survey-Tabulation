@@ -68,7 +68,7 @@ The analytical CSV contains:
 - platform-specific user-motivation variables
 - survey weights
 
-The raw microdata and original source documentation are maintained locally and are not redistributed in the repository.
+The raw microdata and original source documentation are maintained locally and are not redistributed in the repository. The W144 public-use dataset must be obtained from the official Pew Research Center source.
 
 For reproducibility, the expected raw-data location is:
 
@@ -131,6 +131,11 @@ The platform routing QA verifies that platform users and non-users are handled c
 Facebook and Instagram require additional routing validation because respondents using all four platforms were randomly assigned to one of those platform modules.
 
 Derived routing logic is independently reconstructed and compared with the saved W144 derived variables before analysis proceeds.
+
+All 28 WHY variables are also checked against their specified analytical
+universes. Substantive responses and code `99` are prohibited outside the
+routed universe; missing responses inside the universe are counted; and
+unexpected or nonnumeric response codes cause validation to fail.
 
 ---
 
@@ -219,6 +224,11 @@ TikTok     WEIGHT_W144_TT
 The overall W144 weight is retained for source-data validation but is not substituted for the platform-specific weights in the WHY tables.
 
 Weighted percentages are calculated within the appropriate analytical universe and demographic category.
+
+For each selected platform weight, QA verifies numeric and finite values,
+strictly positive values for analytical respondents, and reports missing
+weights within the analytical universe. Missing or invalid analytical
+weights cause the pipeline to fail.
 
 ---
 
@@ -552,7 +562,11 @@ QA includes:
 ### Percentage QA
 
 ```text
-504 / 504 analytical percentage checks pass
+Stage 03: 504 / 504 analytical percentage-sum checks pass
+Stage 05: 1,512 / 1,512 persisted weighted percentages
+          independently rebuilt and reconciled
+Stage 05: 504 / 504 persisted unweighted bases
+          independently rebuilt and reconciled
 ```
 
 ### Effective-Base QA
@@ -629,7 +643,7 @@ The workbook includes:
 - methodological footnotes
 - QA summary
 
-The export script performs round-trip workbook validation after saving the file.
+The export script performs round-trip workbook validation after saving the file. It reopens the saved XLSX and verifies all 28 table placements, 504 displayed bases, 1,512 displayed percentages, small-base notation, and the significance letters stored in the analytical cells.
 
 It also reconciles the significance-marker logic against the statistical-test results and confirms:
 

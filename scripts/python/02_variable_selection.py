@@ -10,6 +10,7 @@ Social Media Platform Usage & User Motivations
 """
 
 from pathlib import Path
+import numpy as np
 import pandas as pd
 
 
@@ -213,6 +214,157 @@ assert not unexpected_codes, (
 )
 
 print("[PASS] WHY response codes valid")
+
+
+# ============================================================
+# WHY ROUTING QA
+# ============================================================
+
+universe_masks = {
+    "Facebook": df["DOV_ASKFB_W144"] == 1,
+    "Instagram": df["DOV_ASKIG_W144"] == 1,
+    "X": df["SMUSE_c_W144"] == 1,
+    "TikTok": df["SMUSE_i_W144"] == 1,
+}
+
+routing_qa_rows = []
+
+for platform, variables in why_variables.items():
+    universe = universe_masks[platform]
+
+    for variable in variables:
+        values = pd.to_numeric(
+            df[variable],
+            errors="coerce",
+        )
+
+        observed = df[variable].notna()
+        nonnumeric = observed & values.isna()
+        unexpected = (
+            observed
+            & ~values.isin(allowed_codes)
+        )
+        response_present = values.isin(allowed_codes)
+
+        routing_qa_rows.append({
+            "platform": platform,
+            "variable": variable,
+            "universe_n": int(universe.sum()),
+            "substantive_inside_n": int(
+                (universe & values.isin({1, 2, 3})).sum()
+            ),
+            "special_99_inside_n": int(
+                (universe & values.eq(99)).sum()
+            ),
+            "missing_inside_n": int(
+                (universe & ~observed).sum()
+            ),
+            "responses_outside_n": int(
+                (~universe & response_present).sum()
+            ),
+            "unexpected_code_n": int(unexpected.sum()),
+            "nonnumeric_response_n": int(nonnumeric.sum()),
+        })
+
+routing_qa = pd.DataFrame(routing_qa_rows)
+
+assert len(routing_qa) == 28
+assert routing_qa["responses_outside_n"].eq(0).all(), (
+    "WHY responses detected outside analytical universes:\n"
+    f"{routing_qa.loc[routing_qa['responses_outside_n'] > 0]}"
+)
+assert routing_qa["unexpected_code_n"].eq(0).all(), (
+    "Unexpected WHY response codes detected:\n"
+    f"{routing_qa.loc[routing_qa['unexpected_code_n'] > 0]}"
+)
+assert routing_qa["nonnumeric_response_n"].eq(0).all(), (
+    "Nonnumeric WHY responses detected:\n"
+    f"{routing_qa.loc[routing_qa['nonnumeric_response_n'] > 0]}"
+)
+
+print(
+    "[PASS] WHY routing QA "
+    "(28 variables; zero responses outside universe)"
+)
+print(
+    "       Missing responses inside universes: "
+    f"{routing_qa['missing_inside_n'].sum():,}"
+)
+
+
+# ============================================================
+# WEIGHT INTEGRITY QA
+# ============================================================
+
+weight_qa_rows = []
+
+for platform, weight in weight_variables.items():
+    universe = universe_masks[platform]
+    raw_weight = df[weight]
+    numeric_weight = pd.to_numeric(
+        raw_weight,
+        errors="coerce",
+    )
+
+    nonnumeric = raw_weight.notna() & numeric_weight.isna()
+    nonfinite = (
+        numeric_weight.notna()
+        & ~np.isfinite(numeric_weight)
+    )
+    nonpositive = (
+        numeric_weight.notna()
+        & np.isfinite(numeric_weight)
+        & numeric_weight.le(0)
+    )
+    analytical = (
+        universe
+        & df[why_variables[platform]].isin({1, 2, 3}).any(axis=1)
+    )
+
+    weight_qa_rows.append({
+        "platform": platform,
+        "weight": weight,
+        "universe_n": int(universe.sum()),
+        "analytical_respondent_n": int(analytical.sum()),
+        "missing_in_universe_n": int(
+            (universe & raw_weight.isna()).sum()
+        ),
+        "nonnumeric_n": int(nonnumeric.sum()),
+        "nonfinite_analytical_n": int(
+            (analytical & nonfinite).sum()
+        ),
+        "nonpositive_analytical_n": int(
+            (analytical & nonpositive).sum()
+        ),
+        "missing_analytical_n": int(
+            (analytical & raw_weight.isna()).sum()
+        ),
+    })
+
+weight_qa = pd.DataFrame(weight_qa_rows)
+
+assert len(weight_qa) == 4
+invalid_weight_columns = [
+    "nonnumeric_n",
+    "nonfinite_analytical_n",
+    "nonpositive_analytical_n",
+    "missing_analytical_n",
+]
+invalid_weight_rows = weight_qa.loc[
+    weight_qa[invalid_weight_columns].sum(axis=1) > 0
+]
+assert invalid_weight_rows.empty, (
+    "Invalid analytical survey weights detected:\n"
+    f"{invalid_weight_rows}"
+)
+
+print("[PASS] Platform weight integrity QA")
+for _, weight_row in weight_qa.iterrows():
+    print(
+        f"       {weight_row['platform']}: "
+        f"missing in universe="
+        f"{weight_row['missing_in_universe_n']}"
+    )
 
 
 # ============================================================

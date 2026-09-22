@@ -690,6 +690,8 @@ ws.sheet_view.showGridLines = False
 # PLATFORM SHEETS
 # ============================================================
 
+table_positions = {}
+
 for platform, sheet_name in (
     PLATFORM_SHEETS.items()
 ):
@@ -916,6 +918,17 @@ for platform, sheet_name in (
 
         base_row = current_row
 
+        table_positions[table_id] = {
+            "sheet_name": sheet_name,
+            "title": title,
+            "title_row": header_row - 1,
+            "header_row": header_row,
+            "category_row": category_row,
+            "base_row": base_row,
+            "response_rows": {},
+            "columns": columns,
+        }
+
         ws.cell(
             base_row,
             1,
@@ -976,6 +989,10 @@ for platform, sheet_name in (
         # ----------------------------------------------------
 
         for response in RESPONSE_ROWS:
+
+            table_positions[table_id][
+                "response_rows"
+            ][response] = current_row
 
             ws.cell(
                 current_row,
@@ -1258,10 +1275,143 @@ assert (
     == 29
 )
 
+assert len(table_positions) == 28
+
+actual_marker_cells = set()
+workbook_base_cells = 0
+workbook_percentage_cells = 0
+workbook_flag_counts = {
+    "OK": 0,
+    "SMALL BASE": 0,
+    "VERY SMALL BASE": 0,
+}
+
+for _, plan_row in plan.iterrows():
+    table_id = plan_row["table_id"]
+    position = table_positions[table_id]
+    table = pd.read_csv(
+        TABLE_DIR / f"{table_id}.csv",
+        index_col=0,
+    )
+    ws_check = check_wb[position["sheet_name"]]
+
+    assert (
+        ws_check.cell(
+            position["title_row"],
+            1,
+        ).value
+        == position["title"]
+    ), f"{table_id}: workbook title or placement mismatch"
+
+    assert (
+        ws_check.cell(
+            position["header_row"],
+            1,
+        ).value
+        == "Response"
+    )
+
+    for col_idx, column_name in enumerate(
+        position["columns"],
+        start=2,
+    ):
+        banner, category = parse_column(column_name)
+        expected_category = (
+            "Total"
+            if banner == "Total"
+            else (
+                f"{CATEGORY_LETTERS[banner][category]}. "
+                f"{category}"
+            )
+        )
+        assert (
+            ws_check.cell(
+                position["category_row"],
+                col_idx,
+            ).value
+            == expected_category
+        ), f"{table_id} / {column_name}: category header mismatch"
+
+        expected_base, expected_flag = get_display_base(
+            table_id,
+            column_name,
+            table.loc["Unweighted Base", column_name],
+        )
+        actual_base = ws_check.cell(
+            position["base_row"],
+            col_idx,
+        ).value
+        assert str(actual_base) == expected_base, (
+            f"{table_id} / {column_name}: workbook base "
+            f"{actual_base!r} != expected {expected_base!r}"
+        )
+        workbook_base_cells += 1
+
+        if banner != "Total":
+            workbook_flag_counts[
+                expected_flag or "OK"
+            ] += 1
+
+        for response in RESPONSE_ROWS:
+            response_row = position["response_rows"][response]
+            assert (
+                ws_check.cell(response_row, 1).value
+                == response
+            )
+
+            percentage = table.loc[
+                response,
+                column_name,
+            ]
+            expected_value = format_percent(percentage)
+            expected_letters = get_significance_letters(
+                table_id,
+                banner,
+                category,
+                response,
+            )
+
+            if expected_letters:
+                expected_value = (
+                    f"{expected_value} {expected_letters}"
+                )
+
+            actual_value = ws_check.cell(
+                response_row,
+                col_idx,
+            ).value
+            assert actual_value == expected_value, (
+                f"{table_id} / {column_name} / {response}: "
+                f"workbook value {actual_value!r} != "
+                f"expected {expected_value!r}"
+            )
+            workbook_percentage_cells += 1
+
+            plain_percentage = format_percent(percentage)
+            if (
+                isinstance(actual_value, str)
+                and actual_value != plain_percentage
+            ):
+                actual_marker_cells.add((
+                    table_id,
+                    banner,
+                    response,
+                    category,
+                ))
+
+assert workbook_base_cells == 504
+assert workbook_percentage_cells == 1512
+assert workbook_flag_counts == {
+    "OK": 448,
+    "SMALL BASE": 21,
+    "VERY SMALL BASE": 7,
+}
+
 check_wb.close()
 
 print(
-    "[PASS] Workbook structure validated"
+    "[PASS] Workbook round-trip validated "
+    "(28 tables | 504 bases | 1,512 percentages)"
 )
 
 
@@ -1329,67 +1479,11 @@ assert (
 )
 
 
-# Independently determine which analytical cells the
-# workbook-generation logic assigns letters to.
-
-actual_marker_cells = set()
-
-for _, plan_row in (
-    plan.iterrows()
-):
-
-    table_id = (
-        plan_row["table_id"]
-    )
-
-    table_path = (
-        TABLE_DIR
-        / f"{table_id}.csv"
-    )
-
-    table = pd.read_csv(
-        table_path,
-        index_col=0,
-    )
-
-    for response in RESPONSE_ROWS:
-
-        for column_name in (
-            table.columns
-        ):
-
-            banner, category = (
-                parse_column(
-                    column_name
-                )
-            )
-
-            letters = (
-                get_significance_letters(
-                    table_id,
-                    banner,
-                    category,
-                    response,
-                )
-            )
-
-            if letters:
-
-                actual_marker_cells.add(
-                    (
-                        table_id,
-                        banner,
-                        response,
-                        category,
-                    )
-                )
-
-
 assert (
     actual_marker_cells
     == expected_marker_cells
 ), (
-    "Excel significance-marker "
+    "Stored Excel significance-marker "
     "cells do not match the "
     "significance-test results."
 )

@@ -1,8 +1,8 @@
-\# Raw Data
+# Raw Data
 
 
 
-The raw Pew Research Center American Trends Panel Wave 144 (W144) microdata are not redistributed in this repository.
+The raw Pew Research Center American Trends Panel Wave 144 (W144) microdata are not redistributed in this repository. Obtain the W144 public-use dataset from the official Pew Research Center source.
 
 
 
@@ -10,7 +10,7 @@ To reproduce the analysis, obtain the W144 public-use dataset and place the CSV 
 
 
 
-`ATP\_W144.csv`
+`ATP_W144.csv`
 
 
 
@@ -18,7 +18,7 @@ Expected path:
 
 
 
-`data/raw/ATP\_W144.csv`
+`data/raw/ATP_W144.csv`
 
 
 

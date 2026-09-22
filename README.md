@@ -21,7 +21,7 @@ The analytical dataset contains:
 - social-media usage variables
 - platform-specific user-motivation batteries
 
-The raw microdata are not redistributed in this repository.
+The raw microdata are not redistributed in this repository. Obtain the W144 public-use dataset from the official Pew Research Center source.
 
 To reproduce the analysis, place the W144 CSV file at:
 
@@ -138,6 +138,12 @@ The final analysis includes:
 - platform-specific survey weights
 - platform-specific analytical universes
 
+This stage also validates all 28 WHY variables against their
+platform-specific universes and checks the integrity of every survey
+weight used by the tabulation plan. It reports missing responses inside
+each universe, rejects responses outside their routed universe, and fails
+on nonnumeric, nonfinite, nonpositive, or missing analytical weights.
+
 The five demographic banners are:
 
 - Age
@@ -236,6 +242,8 @@ The final QA stage independently rebuilds key analytical outputs and reconciles 
 Checks include:
 
 - 28/28 table-level percentage QA
+- independent reconciliation of 504 persisted unweighted bases
+- independent reconciliation of 1,512 persisted weighted percentages
 - 504/504 effective-base records
 - significance-result structure
 - low-base significance exclusions
@@ -310,7 +318,7 @@ The Excel export includes:
 - methodological footnotes
 - QA documentation
 
-The export stage reconciles the significance results against the Excel marker logic and confirms exactly 342 analytical cells receive one or more significance letters.
+After saving, the export stage reopens the actual workbook and verifies all 28 table placements, 504 displayed bases, 1,512 displayed percentages, small-base notation, and stored significance letters. It confirms exactly 342 analytical cells receive one or more significance letters.
 
 ---
 
@@ -352,7 +360,8 @@ The workflow validates:
 - small-base classifications
 - exported CSV structure
 - final workbook structure
-- Excel significance-marker reconciliation
+- persisted CSV base and percentage reconciliation
+- Excel displayed-value and significance-marker reconciliation
 
 The final pipeline produces:
 
