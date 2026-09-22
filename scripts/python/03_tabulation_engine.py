@@ -1,7 +1,7 @@
 """
 03_tabulation_engine.py
 
-Rebuilds the 28 weighted cross-tabulations used in the
+Builds the 28 weighted cross-tabulations used in the
 W144 Social Media Platform Usage & User Motivations study.
 
 The script:
@@ -10,9 +10,8 @@ The script:
 3. Applies the correct analytical universe and platform weight.
 4. Calculates unweighted bases and weighted column percentages.
 5. Produces Total + demographic banner columns.
-6. Validates percentage totals.
-7. Reconciles the rebuilt tables against the previously
-   approved CSV exports when available.
+6. Validates percentage totals and table structure.
+7. Exports T01-T28 to output/tables/.
 """
 
 from pathlib import Path
@@ -41,10 +40,13 @@ PLAN_PATH = (
     / "tabulation_plan.csv"
 )
 
-REFERENCE_DIR = (
+OUTPUT_DIR = (
     PROJECT_ROOT
-    / "excel_export"
+    / "output"
+    / "tables"
 )
+
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # ============================================================
@@ -59,8 +61,6 @@ RESPONSE_LABELS = {
     3: "Not a reason",
 }
 
-SPECIAL_CODES = [99]
-
 PERCENT_TOLERANCE = 0.2
 
 
@@ -69,40 +69,34 @@ PERCENT_TOLERANCE = 0.2
 # ============================================================
 
 banner_definitions = {
-
     "F_AGECAT": {
         1: "18-29",
         2: "30-49",
         3: "50-64",
         4: "65+",
     },
-
     "F_GENDER": {
         1: "A man",
         2: "A woman",
         3: "In some other way",
     },
-
     "F_EDUCCAT": {
         1: "College graduate+",
         2: "Some College",
         3: "H.S. graduate or less",
     },
-
     "F_CREGION": {
         1: "Northeast",
         2: "Midwest",
         3: "South",
         4: "West",
     },
-
     "F_INC_TIER2": {
         1: "Lower income",
         2: "Middle income",
         3: "Upper income",
     },
 }
-
 
 banner_names = {
     "F_AGECAT": "Age",
@@ -161,7 +155,10 @@ def parse_universe(expression):
     Returns a Boolean mask.
     """
 
-    pattern = r"^\s*([A-Za-z0-9_]+)\s*==\s*(-?\d+(?:\.\d+)?)\s*$"
+    pattern = (
+        r"^\s*([A-Za-z0-9_]+)\s*==\s*"
+        r"(-?\d+(?:\.\d+)?)\s*$"
+    )
 
     match = re.match(pattern, str(expression))
 
@@ -178,10 +175,10 @@ def parse_universe(expression):
             f"Universe variable not found: {variable}"
         )
 
-    return pd.to_numeric(
-        df[variable],
-        errors="coerce"
-    ) == value
+    return (
+        pd.to_numeric(df[variable], errors="coerce")
+        == value
+    )
 
 
 # ============================================================
@@ -268,8 +265,7 @@ def calculate_column(
 
 def generate_crosstab(plan_row):
     """
-    Generate Total + five demographic banners for one
-    WHY outcome.
+    Generate Total + five demographic banners for one WHY outcome.
     """
 
     table_id = plan_row["table_id"]
@@ -296,10 +292,7 @@ def generate_crosstab(plan_row):
 
     columns = []
 
-    # --------------------------------------------------------
     # TOTAL
-    # --------------------------------------------------------
-
     result = calculate_column(
         universe_data,
         outcome,
@@ -317,10 +310,7 @@ def generate_crosstab(plan_row):
         },
     })
 
-    # --------------------------------------------------------
     # BANNERS
-    # --------------------------------------------------------
-
     banner_fields = [
         "banner_1",
         "banner_2",
@@ -340,8 +330,7 @@ def generate_crosstab(plan_row):
 
         if banner_var not in banner_definitions:
             raise KeyError(
-                f"{table_id}: no definition for "
-                f"{banner_var}"
+                f"{table_id}: no definition for {banner_var}"
             )
 
         for code, label in (
@@ -367,9 +356,7 @@ def generate_crosstab(plan_row):
                 },
             })
 
-    result_df = pd.DataFrame(columns)
-
-    return result_df
+    return pd.DataFrame(columns)
 
 
 # ============================================================
@@ -450,7 +437,7 @@ print(
 # EXPECTED COLUMN COUNT
 # ============================================================
 
-# Total
+# Total:     1
 # Age:       4
 # Gender:    3
 # Education: 3
@@ -484,7 +471,7 @@ print("[PASS] Banner structure (18 columns per table)")
 # KNOWN BASE RECONCILIATION
 # ============================================================
 
-# T01 was previously validated during development.
+# T01 was independently validated during development.
 # Its total substantive-response base should be 7,135.
 
 assert tab_book["T01"].iloc[0]["base"] == 7135, (
@@ -495,92 +482,168 @@ print("[PASS] T01 approved base reconciled")
 
 
 # ============================================================
-# REFERENCE CSV DISCOVERY
+# EXPORT TABLES
 # ============================================================
 
-reference_files = {
-    table_id:
-        REFERENCE_DIR / f"{table_id}.csv"
-    for table_id in tab_book
-}
+def export_table(table_id, table):
+    """
+    Convert the analytical row-oriented table into the
+    presentation-oriented CSV structure used by the tab book.
 
-available_reference_files = {
-    table_id: path
-    for table_id, path in reference_files.items()
-    if path.exists()
-}
+    Output rows:
+        Unweighted Base
+        Major reason
+        Minor reason
+        Not a reason
+
+    Output columns:
+        Total
+        Age | ...
+        Gender | ...
+        Education | ...
+        Region | ...
+        Income | ...
+    """
+
+    output = pd.DataFrame()
+
+    for _, column in table.iterrows():
+
+        if column["banner"] == "Total":
+            column_name = "Total"
+        else:
+            column_name = (
+                f"{column['banner']} | "
+                f"{column['category']}"
+            )
+
+        output[column_name] = [
+            int(column["base"]),
+            column["Major reason"],
+            column["Minor reason"],
+            column["Not a reason"],
+        ]
+
+    output.index = [
+        "Unweighted Base",
+        "Major reason",
+        "Minor reason",
+        "Not a reason",
+    ]
+
+    output.index.name = None
+
+    return output
+
+
+exported_tables = {}
+
+for table_id, table in tab_book.items():
+
+    export_df = export_table(
+        table_id,
+        table,
+    )
+
+    output_path = (
+        OUTPUT_DIR
+        / f"{table_id}.csv"
+    )
+
+    export_df.to_csv(
+        output_path,
+        index=True,
+        float_format="%.6f",
+    )
+
+    exported_tables[table_id] = output_path
+
+
+assert len(exported_tables) == 28
+
+missing_exports = [
+    table_id
+    for table_id, path in exported_tables.items()
+    if not path.exists()
+]
+
+assert not missing_exports, (
+    f"Missing exported tables: {missing_exports}"
+)
 
 print(
-    f"[PASS] Found "
-    f"{len(available_reference_files)}/28 "
-    f"approved table exports"
+    f"[PASS] Exported 28 tables to "
+    f"{OUTPUT_DIR.relative_to(PROJECT_ROOT)}"
 )
 
 
 # ============================================================
-# REFERENCE BASE CHECK
+# EXPORT READABILITY QA
 # ============================================================
 
-# The saved CSVs include presentation formatting and
-# significance markers, so their exact layout is not assumed
-# here. We nevertheless verify that each reference file is
-# readable and non-empty.
+export_qa = []
 
-reference_readability = []
+for table_id, path in exported_tables.items():
 
-for table_id, path in (
-    available_reference_files.items()
-):
+    exported = pd.read_csv(
+        path,
+        index_col=0,
+    )
 
-    reference = pd.read_csv(path)
-
-    reference_readability.append({
+    export_qa.append({
         "table_id": table_id,
-        "rows": len(reference),
-        "columns": len(reference.columns),
-        "nonempty": not reference.empty,
+        "rows": len(exported),
+        "columns": len(exported.columns),
+        "nonempty": not exported.empty,
+        "correct_rows": len(exported) == 4,
+        "correct_columns": len(exported.columns) == 18,
     })
 
 
-reference_readability = pd.DataFrame(
-    reference_readability
+export_qa = pd.DataFrame(export_qa)
+
+assert export_qa["nonempty"].all()
+assert export_qa["correct_rows"].all()
+assert export_qa["correct_columns"].all()
+
+print(
+    "[PASS] Export validation "
+    "(28 files x 4 rows x 18 analytical columns)"
 )
-
-if not reference_readability.empty:
-
-    assert reference_readability[
-        "nonempty"
-    ].all()
-
-    print(
-        "[PASS] Approved table exports readable"
-    )
 
 
 # ============================================================
 # SUMMARY
 # ============================================================
 
-total_table_columns = sum(
-    len(table)
-    for table in tab_book.values()
-)
-
 print("\n" + "-" * 70)
 print("TABULATION SUMMARY")
 print("-" * 70)
 
 print(f"Tables generated:       {len(tab_book)}")
-print(f"Columns per table:      18")
+print("Columns per table:      18")
 print(f"Percentage QA checks:   {len(percentage_qa)}")
-print(f"Failed percentage QA:   {len(failed_percentage_checks)}")
-print(f"Reference CSVs found:   {len(available_reference_files)}")
+print(
+    f"Failed percentage QA:   "
+    f"{len(failed_percentage_checks)}"
+)
+print(f"Tables exported:        {len(exported_tables)}")
 
-print("\nT01 preview:")
+print("\nT01 analytical preview:")
 print(
     tab_book["T01"]
     .round(1)
     .to_string(index=False)
+)
+
+print("\nT01 export preview:")
+print(
+    pd.read_csv(
+        exported_tables["T01"],
+        index_col=0,
+    )
+    .round(1)
+    .to_string()
 )
 
 
@@ -589,5 +652,5 @@ print(
 # ============================================================
 
 print("\n" + "=" * 70)
-print("TABULATION ENGINE VALIDATION PASSED")
+print("TABULATION ENGINE PASSED AND TABLES EXPORTED")
 print("=" * 70)

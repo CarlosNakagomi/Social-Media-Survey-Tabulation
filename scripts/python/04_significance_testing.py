@@ -1,8 +1,9 @@
 """
 04_significance_testing.py
 
-Reconstructs weighted pairwise significance testing for the
-W144 Social Media Platform Usage & User Motivations study.
+Calculates effective sample sizes and weighted pairwise
+significance tests for the W144 Social Media Platform Usage
+& User Motivations study.
 
 Method:
 - Weighted proportions
@@ -10,6 +11,10 @@ Method:
 - Two-sided independent proportion tests
 - 95% confidence level
 - Unweighted N < 100 excluded from significance testing
+
+Outputs:
+- qa/effective_bases.csv
+- qa/significance_test_results.csv
 
 IMPORTANT:
 These tests are an analytical approximation for portfolio
@@ -41,12 +46,15 @@ PLAN_PATH = (
     PROJECT_ROOT / "tabulation" / "tabulation_plan.csv"
 )
 
-REFERENCE_SIG_PATH = (
-    PROJECT_ROOT / "qa" / "significance_test_results.csv"
+QA_DIR = PROJECT_ROOT / "qa"
+QA_DIR.mkdir(parents=True, exist_ok=True)
+
+EFFECTIVE_BASE_PATH = (
+    QA_DIR / "effective_bases.csv"
 )
 
-REFERENCE_BASE_PATH = (
-    PROJECT_ROOT / "qa" / "effective_bases.csv"
+SIGNIFICANCE_PATH = (
+    QA_DIR / "significance_test_results.csv"
 )
 
 
@@ -73,40 +81,34 @@ NORMAL = NormalDist()
 # ============================================================
 
 banner_definitions = {
-
     "F_AGECAT": {
         1: "18-29",
         2: "30-49",
         3: "50-64",
         4: "65+",
     },
-
     "F_GENDER": {
         1: "A man",
         2: "A woman",
         3: "In some other way",
     },
-
     "F_EDUCCAT": {
         1: "College graduate+",
         2: "Some College",
         3: "H.S. graduate or less",
     },
-
     "F_CREGION": {
         1: "Northeast",
         2: "Midwest",
         3: "South",
         4: "West",
     },
-
     "F_INC_TIER2": {
         1: "Lower income",
         2: "Middle income",
         3: "Upper income",
     },
 }
-
 
 banner_names = {
     "F_AGECAT": "Age",
@@ -124,18 +126,26 @@ banner_names = {
 df = pd.read_csv(DATA_PATH)
 plan = pd.read_csv(PLAN_PATH)
 
-reference_sig = pd.read_csv(
-    REFERENCE_SIG_PATH
-)
-
-reference_bases = pd.read_csv(
-    REFERENCE_BASE_PATH
-)
-
-
 print("=" * 72)
 print("W144 SIGNIFICANCE TESTING")
 print("=" * 72)
+
+print(
+    f"\nRaw data: {df.shape[0]:,} rows x "
+    f"{df.shape[1]:,} columns"
+)
+print(f"Tabulation plan: {len(plan)} tables")
+
+
+# ============================================================
+# BASIC VALIDATION
+# ============================================================
+
+assert len(plan) == 28
+assert plan["table_id"].nunique() == 28
+assert plan["variable"].nunique() == 28
+
+print("\n[PASS] Tabulation plan structure")
 
 
 # ============================================================
@@ -161,6 +171,11 @@ def parse_universe(expression):
 
     variable = match.group(1)
     value = float(match.group(2))
+
+    if variable not in df.columns:
+        raise KeyError(
+            f"Universe variable not found: {variable}"
+        )
 
     return (
         pd.to_numeric(
@@ -209,15 +224,12 @@ def category_statistics(
     subset = data
 
     if banner_var is not None:
-
         subset = subset.loc[
             subset[banner_var] == banner_code
         ]
 
     valid = (
-        subset[outcome].isin(
-            VALID_RESPONSES
-        )
+        subset[outcome].isin(VALID_RESPONSES)
         & subset[weight].notna()
     )
 
@@ -226,22 +238,18 @@ def category_statistics(
     n = len(subset)
 
     if n == 0:
-
         return {
             "n": 0,
             "effective_n": np.nan,
             "percentages": {
                 response: np.nan
-                for response
-                in VALID_RESPONSES
+                for response in VALID_RESPONSES
             },
         }
 
     weights = subset[weight]
 
-    effective_n = kish_effective_n(
-        weights
-    )
+    effective_n = kish_effective_n(weights)
 
     denominator = weights.sum()
 
@@ -300,15 +308,9 @@ def pairwise_prop_test(
         )
     )
 
-    significant = (
-        p_value < ALPHA
-    )
+    significant = p_value < ALPHA
 
-    return (
-        z,
-        p_value,
-        significant,
-    )
+    return z, p_value, significant
 
 
 # ============================================================
@@ -316,9 +318,7 @@ def pairwise_prop_test(
 # ============================================================
 
 effective_base_rows = []
-
 table_stats = {}
-
 
 for _, plan_row in plan.iterrows():
 
@@ -326,6 +326,16 @@ for _, plan_row in plan.iterrows():
     platform = plan_row["platform"]
     outcome = plan_row["variable"]
     weight = plan_row["weight"]
+
+    if outcome not in df.columns:
+        raise KeyError(
+            f"{table_id}: outcome not found: {outcome}"
+        )
+
+    if weight not in df.columns:
+        raise KeyError(
+            f"{table_id}: weight not found: {weight}"
+        )
 
     universe = parse_universe(
         plan_row["universe"]
@@ -335,10 +345,7 @@ for _, plan_row in plan.iterrows():
 
     table_stats[table_id] = {}
 
-    # --------------------------------------------------------
     # TOTAL
-    # --------------------------------------------------------
-
     stats = category_statistics(
         data,
         outcome,
@@ -361,25 +368,16 @@ for _, plan_row in plan.iterrows():
         "weighting_deff": weighting_deff,
     })
 
-    # --------------------------------------------------------
     # BANNERS
-    # --------------------------------------------------------
-
     for banner_var, categories in (
         banner_definitions.items()
     ):
 
-        banner = banner_names[
-            banner_var
-        ]
+        banner = banner_names[banner_var]
 
-        table_stats[table_id][
-            banner
-        ] = {}
+        table_stats[table_id][banner] = {}
 
-        for code, category in (
-            categories.items()
-        ):
+        for code, category in categories.items():
 
             stats = category_statistics(
                 data,
@@ -394,8 +392,7 @@ for _, plan_row in plan.iterrows():
             ][banner][category] = stats
 
             weighting_deff = (
-                stats["n"]
-                / stats["effective_n"]
+                stats["n"] / stats["effective_n"]
                 if stats["effective_n"] > 0
                 else np.nan
             )
@@ -415,8 +412,16 @@ effective_bases = pd.DataFrame(
     effective_base_rows
 )
 
-
 assert len(effective_bases) == 504
+
+assert (
+    effective_bases[
+        ["table_id", "platform", "banner", "category"]
+    ]
+    .duplicated()
+    .sum()
+    == 0
+)
 
 print(
     "[PASS] Effective bases calculated "
@@ -425,64 +430,8 @@ print(
 
 
 # ============================================================
-# RECONCILE EFFECTIVE BASES
-# ============================================================
-
-base_keys = [
-    "table_id",
-    "platform",
-    "banner",
-    "category",
-]
-
-base_compare = effective_bases.merge(
-    reference_bases,
-    on=base_keys,
-    suffixes=("_new", "_ref"),
-    validate="one_to_one",
-)
-
-
-assert len(base_compare) == 504
-
-
-assert (
-    base_compare["unweighted_n_new"]
-    ==
-    base_compare["unweighted_n_ref"]
-).all()
-
-
-effective_n_difference = (
-    base_compare["effective_n_new"]
-    -
-    base_compare["effective_n_ref"]
-).abs()
-
-
-assert (
-    effective_n_difference < 1e-8
-).all(), (
-    "Effective N differs from "
-    "approved results"
-)
-
-
-print(
-    "[PASS] Effective bases reconciled "
-    "with approved results"
-)
-
-
-# ============================================================
 # MEASURE LABELS
 # ============================================================
-
-# The tabulation plan stores the questionnaire battery name
-# (FBWHY, IGWHY, XTWHY, TTWHY) in the "question" field.
-#
-# For reporting and significance-test reconciliation, however,
-# each a-g item needs its substantive measure label.
 
 MEASURE_LABELS = {
     "a": "Get news",
@@ -496,14 +445,6 @@ MEASURE_LABELS = {
 
 
 def get_measure_label(variable):
-    """
-    Convert a WHY variable name into its substantive measure.
-
-    Examples:
-        FBWHY_a_W144 -> Get news
-        IGWHY_d_W144 -> Entertainment
-        XTWHY_g_W144 -> Look at product reviews or recommendations
-    """
 
     match = re.search(
         r"WHY_([a-g])_W144$",
@@ -512,12 +453,13 @@ def get_measure_label(variable):
 
     if not match:
         raise ValueError(
-            f"Unable to determine WHY item from variable: {variable}"
+            "Unable to determine WHY item from "
+            f"variable: {variable}"
         )
 
-    item_letter = match.group(1)
-
-    return MEASURE_LABELS[item_letter]
+    return MEASURE_LABELS[
+        match.group(1)
+    ]
 
 
 # ============================================================
@@ -526,31 +468,25 @@ def get_measure_label(variable):
 
 test_rows = []
 
-
 for _, plan_row in plan.iterrows():
 
     table_id = plan_row["table_id"]
     platform = plan_row["platform"]
     variable = plan_row["variable"]
 
-    # Use substantive item label rather than the battery name
-    # stored in tabulation_plan["question"].
     measure = get_measure_label(variable)
 
     for banner, categories in (
         table_stats[table_id].items()
     ):
 
-        category_names = list(
-            categories.keys()
-        )
-
-        # Only categories with unweighted N >= 100
-        # participate in significance testing.
         eligible_categories = [
             category
-            for category in category_names
-            if categories[category]["n"] >= MIN_TEST_BASE
+            for category in categories
+            if (
+                categories[category]["n"]
+                >= MIN_TEST_BASE
+            )
         ]
 
         for category_1, category_2 in combinations(
@@ -564,11 +500,15 @@ for _, plan_row in plan.iterrows():
             for response_code in VALID_RESPONSES:
 
                 pct_1 = (
-                    stats_1["percentages"][response_code]
+                    stats_1["percentages"][
+                        response_code
+                    ]
                 )
 
                 pct_2 = (
-                    stats_2["percentages"][response_code]
+                    stats_2["percentages"][
+                        response_code
+                    ]
                 )
 
                 z, p_value, significant = (
@@ -585,9 +525,10 @@ for _, plan_row in plan.iterrows():
                     "platform": platform,
                     "measure": measure,
                     "banner": banner,
-                    "response": RESPONSE_LABELS[
-                        response_code
-                    ],
+                    "response":
+                        RESPONSE_LABELS[
+                            response_code
+                        ],
                     "category_1": category_1,
                     "category_2": category_2,
                     "pct_1": pct_1,
@@ -608,7 +549,6 @@ for _, plan_row in plan.iterrows():
 
 sig_results = pd.DataFrame(test_rows)
 
-
 print(
     f"[PASS] Pairwise tests generated: "
     f"{len(sig_results):,}"
@@ -616,7 +556,7 @@ print(
 
 
 # ============================================================
-# EXPECTED TEST COUNT
+# TEST COUNT QA
 # ============================================================
 
 assert len(sig_results) == 1596, (
@@ -628,7 +568,7 @@ print("[PASS] Expected 1,596 tests")
 
 
 # ============================================================
-# SIGNIFICANT TEST COUNT
+# SIGNIFICANT COUNT QA
 # ============================================================
 
 significant_count = int(
@@ -668,7 +608,7 @@ print(
 
 
 # ============================================================
-# RECONCILE WITH APPROVED TEST RESULTS
+# KEY UNIQUENESS QA
 # ============================================================
 
 comparison_keys = [
@@ -681,29 +621,15 @@ comparison_keys = [
     "category_2",
 ]
 
-
-# Before merging, verify that both datasets contain
-# unique analytical keys.
-new_duplicate_count = int(
+duplicate_count = int(
     sig_results.duplicated(
         comparison_keys
     ).sum()
 )
 
-reference_duplicate_count = int(
-    reference_sig.duplicated(
-        comparison_keys
-    ).sum()
-)
-
-assert new_duplicate_count == 0, (
+assert duplicate_count == 0, (
     f"Generated results contain "
-    f"{new_duplicate_count} duplicate keys."
-)
-
-assert reference_duplicate_count == 0, (
-    f"Reference results contain "
-    f"{reference_duplicate_count} duplicate keys."
+    f"{duplicate_count} duplicate keys."
 )
 
 print(
@@ -711,127 +637,10 @@ print(
 )
 
 
-comparison = sig_results.merge(
-    reference_sig,
-    on=comparison_keys,
-    suffixes=("_new", "_ref"),
-    how="inner",
-    validate="one_to_one",
-)
-
-
-assert len(comparison) == 1596, (
-    "Generated significance tests do not fully "
-    "reconcile with the approved reference file. "
-    f"Matched {len(comparison):,} of 1,596 rows."
-)
-
-print(
-    "[PASS] All 1,596 significance-test keys matched"
-)
-
-
 # ============================================================
-# NUMERIC RECONCILIATION
+# COVERAGE QA
 # ============================================================
 
-numeric_columns = [
-    "pct_1",
-    "pct_2",
-    "effective_n_1",
-    "effective_n_2",
-    "difference_pp",
-    "z",
-    "p_value",
-]
-
-
-max_differences = {}
-
-
-for column in numeric_columns:
-
-    difference = (
-        comparison[f"{column}_new"]
-        -
-        comparison[f"{column}_ref"]
-    ).abs()
-
-    max_difference = difference.max()
-
-    max_differences[column] = max_difference
-
-    assert (
-        difference < 1e-8
-    ).all(), (
-        f"{column} differs from approved results. "
-        f"Maximum absolute difference: "
-        f"{max_difference}"
-    )
-
-
-print(
-    "[PASS] Percentages, effective Ns, "
-    "z-statistics and p-values reconciled"
-)
-
-
-# ============================================================
-# BASE RECONCILIATION
-# ============================================================
-
-assert (
-    comparison["n_1_new"]
-    ==
-    comparison["n_1_ref"]
-).all(), (
-    "n_1 differs from approved results"
-)
-
-
-assert (
-    comparison["n_2_new"]
-    ==
-    comparison["n_2_ref"]
-).all(), (
-    "n_2 differs from approved results"
-)
-
-
-print(
-    "[PASS] Unweighted test bases reconciled"
-)
-
-
-# ============================================================
-# SIGNIFICANCE FLAG RECONCILIATION
-# ============================================================
-
-assert (
-    comparison["significant_95_new"]
-    ==
-    comparison["significant_95_ref"]
-).all(), (
-    "Significance flags differ from "
-    "approved results"
-)
-
-
-print(
-    "[PASS] Significance flags reconciled"
-)
-
-print(
-    "[PASS] All 1,596 tests reconciled "
-    "with approved results"
-)
-
-
-# ============================================================
-# ADDITIONAL QA
-# ============================================================
-
-# Confirm that all four platforms are represented.
 expected_platforms = {
     "Facebook",
     "Instagram",
@@ -847,8 +656,6 @@ assert actual_platforms == expected_platforms, (
     f"Unexpected platform set: {actual_platforms}"
 )
 
-
-# Confirm expected response categories.
 expected_responses = {
     "Major reason",
     "Minor reason",
@@ -863,8 +670,6 @@ assert actual_responses == expected_responses, (
     f"Unexpected response set: {actual_responses}"
 )
 
-
-# Confirm seven substantive measures.
 assert (
     sig_results["measure"].nunique()
     == 7
@@ -872,10 +677,81 @@ assert (
     "Expected seven WHY measures"
 )
 
+assert sig_results["table_id"].nunique() == 28
 
 print(
-    "[PASS] Platform, response and measure "
-    "coverage validated"
+    "[PASS] Platform, response, measure "
+    "and table coverage validated"
+)
+
+
+# ============================================================
+# EXPORT OUTPUTS
+# ============================================================
+
+effective_bases.to_csv(
+    EFFECTIVE_BASE_PATH,
+    index=False,
+    float_format="%.12g",
+)
+
+sig_results.to_csv(
+    SIGNIFICANCE_PATH,
+    index=False,
+    float_format="%.12g",
+)
+
+assert EFFECTIVE_BASE_PATH.exists()
+assert SIGNIFICANCE_PATH.exists()
+
+print(
+    "[PASS] Effective bases exported to "
+    "qa/effective_bases.csv"
+)
+
+print(
+    "[PASS] Significance results exported to "
+    "qa/significance_test_results.csv"
+)
+
+
+# ============================================================
+# ROUND-TRIP OUTPUT QA
+# ============================================================
+
+saved_bases = pd.read_csv(
+    EFFECTIVE_BASE_PATH
+)
+
+saved_sig = pd.read_csv(
+    SIGNIFICANCE_PATH
+)
+
+assert len(saved_bases) == 504
+assert len(saved_sig) == 1596
+
+assert (
+    saved_sig["significant_95"]
+    .astype(str)
+    .str.lower()
+    .eq("true")
+    .sum()
+    == 495
+)
+
+assert (
+    (
+        saved_sig["n_1"] < MIN_TEST_BASE
+    )
+    |
+    (
+        saved_sig["n_2"] < MIN_TEST_BASE
+    )
+).sum() == 0
+
+print(
+    "[PASS] Exported QA files passed "
+    "round-trip validation"
 )
 
 
@@ -911,25 +787,6 @@ print(
     "Multiplicity adjustment: None "
     "(exploratory)"
 )
-
-
-# ============================================================
-# MAXIMUM RECONCILIATION DIFFERENCES
-# ============================================================
-
-print(
-    "\nMaximum absolute differences "
-    "vs. approved results:"
-)
-
-for column, difference in (
-    max_differences.items()
-):
-
-    print(
-        f"  {column:<20} "
-        f"{difference:.12g}"
-    )
 
 
 # ============================================================
@@ -973,5 +830,5 @@ print(
 # ============================================================
 
 print("\n" + "=" * 72)
-print("SIGNIFICANCE TESTING VALIDATION PASSED")
+print("SIGNIFICANCE TESTING PASSED AND OUTPUTS EXPORTED")
 print("=" * 72)

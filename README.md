@@ -2,52 +2,42 @@
 
 ### Survey Tabulation, Statistical Testing & QA Workflow
 
-A survey data processing and cross-tabulation portfolio project using Pew Research Center's American Trends Panel Wave 144 (W144).
+This project demonstrates an end-to-end survey tabulation workflow using public-use data from the Pew Research Center American Trends Panel Wave 144 (W144), conducted March 18–24, 2024.
 
-This project demonstrates an end-to-end market research workflow: questionnaire interpretation, routing validation, analytical variable selection, tabulation planning, weighted cross-tabs, effective sample-size calculations, significance testing, automated QA, and production of a client-ready Excel tab book.
-
----
-
-## Project Overview
-
-This project analyzes how motivations for using **Facebook, Instagram, X, and TikTok** vary across demographic groups.
-
-Rather than focusing only on final percentages, the project emphasizes the survey-processing workflow required to produce accurate, consistent, and auditable research tables.
-
-The analytical workflow is:
-
-**Questionnaire → Raw Survey Data → Data Validation → Variable Selection → Tabulation Plan → Banner Creation → Weighted Cross-Tabs → Effective Base Calculation → Significance Testing → QA → Excel Tab Book**
+The project was designed as a market-research and survey-processing portfolio study, with emphasis on reproducible cross-tabulation, weighting, significance testing, quality assurance, discrepancy investigation, and production of a formatted Excel tab book.
 
 ---
 
 ## Data Source
 
-**Pew Research Center — American Trends Panel Wave 144 (W144)**  
-Fieldwork: **March 18–24, 2024**
+The analysis uses the Pew Research Center American Trends Panel Wave 144 public-use dataset.
 
-Analytical dataset:
+The analytical dataset contains:
 
-- **10,454 records**
-- **195 variables**
-- **4 social media platforms**
-- Platform-specific survey weights
-- Demographic profile variables
+- 10,454 respondent records
+- 195 variables
+- survey weights
+- demographic variables
+- social-media usage variables
+- platform-specific user-motivation batteries
 
-The questionnaire, methodology, codebook, and public-use documentation were used to interpret survey routing, variable definitions, analytical universes, and weights.
+The raw microdata are not redistributed in this repository.
 
-The raw Pew Research Center microdata are **not redistributed in this repository**. Users who wish to reproduce the analysis should obtain the Wave 144 public-use dataset directly from Pew Research Center and place the CSV file at:
+To reproduce the analysis, place the W144 CSV file at:
 
 ```text
 data/raw/ATP_W144.csv
 ```
 
+Original source documentation is maintained locally and excluded from the repository.
+
 ---
 
 ## Research Question
 
-> How do social media usage patterns and motivations differ across Facebook, Instagram, X, and TikTok, and across demographic groups?
+How do social-media usage motivations differ across Facebook, Instagram, X, and TikTok, and across demographic groups?
 
-Seven platform-use motivations are analyzed:
+Seven motivations are analyzed for each platform:
 
 1. Get news
 2. Keep up with politics or political issues
@@ -57,79 +47,114 @@ Seven platform-use motivations are analyzed:
 6. Connect with others who share your interests
 7. Look at product reviews or recommendations
 
-Across four platforms, this produces **28 analytical cross-tabs**.
+This produces 28 analytical cross-tabulations:
+
+- T01–T07: Facebook
+- T08–T14: Instagram
+- T15–T21: X
+- T22–T28: TikTok
 
 ---
 
 ## Project Highlights
 
-| Component | Result |
+| Metric | Result |
 |---|---:|
-| Survey records | 10,454 |
-| Source variables | 195 |
-| Platforms analyzed | 4 |
-| WHY measures | 28 |
+| Respondent records | 10,454 |
+| Raw variables | 195 |
+| Social platforms | 4 |
+| Motivation variables | 28 |
 | Cross-tab tables | 28 |
 | Analytical columns per table | 18 |
-| Table-column validations | 504 |
-| Banner cells reviewed | 476 |
+| Percentage QA checks | 504 |
+| Banner cells screened for base size | 476 |
 | Pairwise significance tests | 1,596 |
 | Significant comparisons at 95% | 495 |
-| Low-base significance tests | 0 |
+| Cells receiving significance markers | 342 |
+| Low-base categories entering significance tests | 0 |
 
 ---
 
-## Survey Tabulation Workflow
+## Analytical Workflow
 
-### 1. Data Validation
+The project follows a reproducible survey-processing pipeline:
 
-The raw survey dataset is validated before analysis.
+```text
+Questionnaire / Public-Use Data
+        ↓
+Raw Survey Data
+        ↓
+Data Validation
+        ↓
+Variable Selection
+        ↓
+Tabulation Plan
+        ↓
+Weighted Cross-Tabs
+        ↓
+Effective Sample Sizes
+        ↓
+Significance Testing
+        ↓
+Final QA & Small-Base Screening
+        ↓
+Excel Tab Book
+```
+
+The complete workflow is implemented through six sequential Python scripts.
+
+---
+
+## 1. Data Validation
+
+`scripts/python/01_data_validation.py`
+
+The first stage validates the source dataset before analysis.
 
 Checks include:
 
 - expected dataset dimensions
 - required analytical variables
-- platform-use routing
-- follow-up question routing
-- Facebook/Instagram module assignment
-- survey weight availability
+- platform usage variables
+- routing consistency
+- derived Facebook/Instagram routing
+- demographic banner availability
+- survey-weight availability
 
-This prevents structural questionnaire missingness from being incorrectly treated as respondent nonresponse.
+Platform routing and derived-universe checks must pass before the analytical pipeline proceeds.
 
-### 2. Variable Selection
+---
 
-Variables are selected based on the research objective and questionnaire structure before statistical results are examined.
+## 2. Variable Selection
 
-Candidate variables are screened using:
+`scripts/python/02_variable_selection.py`
 
-- questionnaire routing
-- valid response availability
-- missingness
-- analytical universe
-- usable base size
-- cross-tab cell adequacy
+The second stage defines the analytical variables used in the project.
 
-The resulting analytical specification contains **28 WHY variables**.
+The final analysis includes:
 
-### 3. Tabulation Plan
+- 28 platform-specific WHY variables
+- 5 primary demographic banners
+- platform-specific survey weights
+- platform-specific analytical universes
 
-A formal tabulation specification defines:
+The five demographic banners are:
 
-- table ID
-- platform
-- analytical variable
-- measure
-- response codes
-- universe
-- survey weight
-- banner variables
-- display rules
-- significance-testing requirements
-- special-code handling
+- Age
+- Gender
+- Education
+- Census Region
+- Income
 
-This separates analytical specifications from calculation logic and makes the tabulation workflow easier to audit.
+Detailed or secondary demographic variables are excluded from the primary tab book to keep the output focused and interpretable.
 
-### 4. Weighted Cross-Tabs
+---
+
+## 3. Weighted Cross-Tabulation
+
+`scripts/python/03_tabulation_engine.py`
+
+The tabulation engine generates all 28 analytical tables from the raw W144 data and the saved tabulation plan.
 
 Each table contains:
 
@@ -140,87 +165,205 @@ Each table contains:
 - Region
 - Income
 
-Weighted percentages are reported while displayed respondent bases remain unweighted.
+This produces 18 analytical columns per table.
 
-Each table contains **18 analytical columns**, producing **504 table-column validation checks** across the 28 tables.
+For each column, the table displays:
 
-### 5. Effective Sample Size
+- Unweighted Base
+- Major reason
+- Minor reason
+- Not a reason
 
-Kish effective sample sizes are calculated to account for the loss of statistical precision associated with unequal survey weights.
+Weighted percentages are calculated using the appropriate platform-specific survey weight.
 
-These diagnostics are used in the project's significance-testing procedure rather than treating weighted observations as a simple random sample.
+Special response code `99` is excluded from the substantive percentage denominator.
 
-### 6. Significance Testing
+The script performs 504 percentage-sum QA checks and exports:
 
-Pairwise column-proportion tests are conducted within demographic banners using:
+```text
+output/tables/T01.csv
+...
+output/tables/T28.csv
+```
 
-- weighted proportions
+---
+
+## 4. Effective Sample Size & Significance Testing
+
+`scripts/python/04_significance_testing.py`
+
+The significance-testing stage calculates Kish-adjusted effective sample sizes and performs pairwise column-proportion tests within each demographic banner.
+
+Kish effective sample size is calculated as:
+
+```text
+n_eff = (sum(w))² / sum(w²)
+```
+
+Pairwise tests use:
+
+- weighted percentage estimates
 - Kish-adjusted effective sample sizes
 - two-sided tests
 - 95% confidence level
-- minimum unweighted base of 100
+- minimum unweighted test base of N = 100
 
-The workflow evaluates **1,596 pairwise comparisons**.
+The pipeline generates:
 
-Categories with fewer than 100 unweighted respondents are automatically excluded from significance testing.
+- 504 effective-base records
+- 1,596 pairwise significance tests
+- 495 statistically significant pairwise comparisons
 
-### 7. QA & Discrepancy Validation
+No category with an unweighted base below 100 enters significance testing.
 
-QA is embedded throughout the workflow rather than performed only after tables are produced.
+Outputs:
 
-Validation covers:
+```text
+qa/effective_bases.csv
+qa/significance_test_results.csv
+```
+
+No multiplicity adjustment is applied; significance results are exploratory.
+
+---
+
+## 5. Final QA & Small-Base Screening
+
+`scripts/python/05_final_qa.py`
+
+The final QA stage independently rebuilds key analytical outputs and reconciles them with upstream pipeline results.
+
+Checks include:
+
+- 28/28 table-level percentage QA
+- 504/504 effective-base records
+- significance-result structure
+- low-base significance exclusions
+- platform and table coverage
+- small-base classification
+
+A total of 476 demographic banner cells are reviewed:
+
+| Base classification | Cells |
+|---|---:|
+| N ≥ 100 | 448 |
+| 30 ≤ N < 100 | 21 |
+| N < 30 | 7 |
+
+All 28 cells with N < 100 belong to the `Gender | In some other way` category.
+
+Small-base notation:
+
+- `*` = N between 30 and 99
+- `**` = N below 30
+
+Outputs:
+
+```text
+qa/qa_summary.csv
+qa/small_base_qa.csv
+```
+
+---
+
+## 6. Automated Excel Tab Book
+
+`scripts/python/06_excel_export.py`
+
+The final stage converts the analytical pipeline outputs into a formatted Excel tab book.
+
+The workbook is generated automatically from:
+
+- the 28 cross-tab CSV files
+- the tabulation plan
+- significance-test results
+- small-base QA
+- final table-level QA
+
+Final workbook:
+
+```text
+output/tab_books/Reach3_Social_Media_TabBook.xlsx
+```
+
+The workbook contains eight sheets:
+
+1. `01_README`
+2. `02_CONTENTS`
+3. `03_METHODOLOGY`
+4. `04_FACEBOOK`
+5. `05_INSTAGRAM`
+6. `06_X`
+7. `07_TIKTOK`
+8. `08_QA_SUMMARY`
+
+The four platform sheets contain seven stacked tables each.
+
+The Excel export includes:
+
+- grouped demographic banner headers
+- category comparison letters
+- unweighted bases
+- weighted percentages
+- significance markers
+- small-base flags
+- methodological footnotes
+- QA documentation
+
+The export stage reconciles the significance results against the Excel marker logic and confirms exactly 342 analytical cells receive one or more significance letters.
+
+---
+
+## Significance-Letter Interpretation
+
+Within each demographic banner, categories are assigned letters such as A, B, C, and D.
+
+When a percentage contains a letter, that percentage is statistically higher than the category represented by that letter at the 95% confidence level under the project's testing procedure.
+
+For example:
+
+```text
+10.4% CD
+```
+
+indicates that the displayed percentage is significantly higher than the categories represented by C and D.
+
+Categories with unweighted bases below 100 are excluded from significance testing.
+
+---
+
+## Quality Assurance
+
+QA is built into each stage rather than performed only after tabulation.
+
+The workflow validates:
 
 - questionnaire routing
 - analytical universes
+- required variables
 - response codes
 - survey weights
-- percentage calculations
-- banner structure
-- effective bases
-- significance-test calculations
-- small-base rules
-- final table coverage
+- table structure
+- percentage sums
+- effective sample sizes
+- pairwise-test uniqueness
+- significance-test coverage
+- low-base exclusions
+- small-base classifications
+- exported CSV structure
+- final workbook structure
+- Excel significance-marker reconciliation
 
----
+The final pipeline produces:
 
-## QA & Validation
-
-| QA Check | Result |
-|---|---:|
-| Cross-tabs validated | 28 / 28 PASS |
-| Table-column percentage checks | 504 / 504 PASS |
-| Effective-base records | 504 |
-| Banner cells reviewed | 476 |
-| Adequate bases (N ≥ 100) | 448 |
-| Small bases (30 ≤ N < 100) | 21 |
-| Very small bases (N < 30) | 7 |
-| Significance tests reviewed | 1,596 |
-| Tests involving N < 100 | **0** |
-
-All **28 low-base banner cells** occurred in the `Gender | In some other way` category.
-
-Small bases are flagged in the final tab book, and categories with N < 100 are excluded from significance testing.
-
----
-
-## Final Deliverable
-
-The primary recruiter/client-facing deliverable is:
-
-**[`Reach3_Social_Media_TabBook.xlsx`](output/tab_books/Reach3_Social_Media_TabBook.xlsx)**
-
-The Excel tab book contains:
-
-- project documentation
-- table of contents
-- methodology
-- Facebook tables
-- Instagram tables
-- X tables
-- TikTok tables
-- QA summary
-
-Tables include unweighted bases, weighted percentages, demographic banners, significance indicators, and small-base warnings.
+```text
+28 / 28 tables passing percentage QA
+504 / 504 analytical percentage checks passing
+1,596 pairwise tests validated
+495 significant pairwise comparisons
+342 analytical cells receiving significance markers
+0 low-base categories entering significance testing
+```
 
 ---
 
@@ -229,18 +372,12 @@ Tables include unweighted bases, weighted percentages, demographic banners, sign
 ```text
 Social-Media-Survey-Tabulation/
 │
+├── README.md
+├── requirements.txt
+├── .gitignore
+│
 ├── documentation/
 │   └── methodology.md
-│
-├── output/
-│   └── tab_books/
-│       └── Reach3_Social_Media_TabBook.xlsx
-│
-├── qa/
-│   ├── effective_bases.csv
-│   ├── qa_summary.csv
-│   ├── significance_test_results.csv
-│   └── small_base_qa.csv
 │
 ├── scripts/
 │   └── python/
@@ -248,66 +385,50 @@ Social-Media-Survey-Tabulation/
 │       ├── 02_variable_selection.py
 │       ├── 03_tabulation_engine.py
 │       ├── 04_significance_testing.py
-│       └── 05_final_qa.py
+│       ├── 05_final_qa.py
+│       └── 06_excel_export.py
 │
 ├── tabulation/
 │   ├── tabulation_plan.csv
 │   └── variable_selection_matrix.csv
 │
-├── .gitignore
-├── requirements.txt
-└── README.md
+├── output/
+│   ├── tables/
+│   │   ├── T01.csv
+│   │   ├── ...
+│   │   └── T28.csv
+│   │
+│   └── tab_books/
+│       └── Reach3_Social_Media_TabBook.xlsx
+│
+└── qa/
+    ├── effective_bases.csv
+    ├── significance_test_results.csv
+    ├── qa_summary.csv
+    └── small_base_qa.csv
 ```
 
-The raw survey dataset and original source documentation are maintained locally and excluded from the public repository.
-
----
-
-## Tools & Technologies
-
-**Python**
-
-- pandas
-- NumPy
-
-**Survey Analytics**
-
-- questionnaire routing
-- analytical universe definition
-- survey weighting
-- cross-tabulation
-- demographic banner analysis
-- Kish effective sample size
-- column-proportion significance testing
-- small-base management
-
-**Reporting & QA**
-
-- Microsoft Excel
-- automated validation
-- discrepancy reconciliation
-- reproducible tabulation specifications
-- audit-ready QA outputs
+Raw survey data and original source documentation are maintained locally and excluded from version control.
 
 ---
 
 ## How to Run
 
-The project was validated using **Python 3.11**.
+The project was developed and validated using Python 3.11.
 
-Install the required packages:
+Install dependencies:
 
 ```bash
 py -3.11 -m pip install -r requirements.txt
 ```
 
-Obtain the Pew Research Center Wave 144 public-use dataset and save the CSV locally as:
+Place the W144 CSV at:
 
 ```text
 data/raw/ATP_W144.csv
 ```
 
-Then run the analytical validation workflow sequentially:
+Then run the pipeline sequentially:
 
 ```bash
 py -3.11 scripts/python/01_data_validation.py
@@ -315,36 +436,46 @@ py -3.11 scripts/python/02_variable_selection.py
 py -3.11 scripts/python/03_tabulation_engine.py
 py -3.11 scripts/python/04_significance_testing.py
 py -3.11 scripts/python/05_final_qa.py
+py -3.11 scripts/python/06_excel_export.py
 ```
 
-A successful final validation ends with:
-
-```text
-FINAL QA VALIDATION PASSED
-```
+A successful run regenerates the analytical tables, QA outputs, significance-testing results, and final Excel tab book.
 
 ---
 
 ## Methodology
 
-Detailed methodology — including routing rules, analytical universes, weighting, effective sample-size calculations, significance testing, small-base rules, QA procedures, and statistical limitations — is available here:
+Detailed methodological documentation is available in:
 
-**[`documentation/methodology.md`](documentation/methodology.md)**
+[`documentation/methodology.md`](documentation/methodology.md)
 
 ---
 
 ## Statistical Note
 
-The significance-testing workflow uses weighted estimates and Kish-adjusted effective sample sizes.
+The significance tests in this project use weighted estimates and Kish-adjusted effective sample sizes.
 
-It is an exploratory survey-tabulation procedure and is **not intended to reproduce Pew Research Center's exact complex-survey variance estimation**.
+They are intended to demonstrate a reproducible survey-tabulation and QA workflow and are not intended to reproduce Pew Research Center's exact complex-survey variance-estimation procedure, which cannot be reconstructed from the public-use variables and documentation used here.
 
-No multiplicity adjustment is applied to the pairwise comparisons.
+No multiplicity adjustment is applied, so significance markers should be interpreted as exploratory.
 
 ---
 
 ## Portfolio Context
 
-This project was developed as a portfolio demonstration of survey data processing and tabulation skills relevant to market research and research operations roles.
+This project demonstrates practical survey-data processing skills relevant to market research and data-tabulation roles, including:
 
-The emphasis is on **accuracy, reproducibility, QA, structured tabulation specifications, statistical testing, and production-ready research deliverables**.
+- questionnaire and routing interpretation
+- survey-data validation
+- tabulation planning
+- weighted cross-tabulation
+- demographic banner construction
+- significance testing
+- effective-base calculation
+- small-base handling
+- discrepancy investigation
+- automated QA
+- Excel tab-book production
+- reproducible analytical documentation
+
+The project emphasizes accuracy, reproducibility, and transparent QA from raw survey data through final client-style tabulation output.
