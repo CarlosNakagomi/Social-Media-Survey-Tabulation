@@ -75,6 +75,18 @@ This produces 28 analytical cross-tabulations:
 
 ---
 
+## Key Findings
+
+- On Facebook, 74.8% selected keeping up with friends and family as a major reason for using the platform.
+- On TikTok, 81.4% selected entertainment as a major reason.
+- On X, entertainment led at 44.8%, while shared interests, sports/pop culture, news, and politics formed a descriptive cluster between 24.3% and 28.3%.
+- On Instagram, entertainment was a major reason for 65.3% of users ages 18–29 versus 32.8% of users ages 65+; this within-platform difference was statistically significant.
+- On Facebook, friends and family was a major reason for 80.2% of women versus 67.6% of men; this within-platform difference was statistically significant.
+
+Platform-level percentages describe different platform-specific or routed respondent universes, so comparisons across platforms are descriptive. Significance testing applies to demographic comparisons within a platform.
+
+---
+
 ## Analytical Workflow
 
 The project follows a reproducible survey-processing pipeline:
