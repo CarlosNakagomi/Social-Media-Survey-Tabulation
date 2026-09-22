@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# Raw Pew Research Center microdata
+data/raw/*.csv
+data/raw/*.sav
+W144_Mar24/
+W144_Mar24.zip
+
+# Temporary / intermediate reconstruction files
+excel_export/
+Reach3_TabBook_Export.zip
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Office temporary files
+~$*.xlsx
+~$*.docx
+
+# Original Pew documentation
+docs/

@@ -1,0 +1,477 @@
+﻿table_id,column,displayed_base,flag
+T01,Age | 18-29,433,OK
+T01,Age | 30-49,2351,OK
+T01,Age | 50-64,2154,OK
+T01,Age | 65+,2184,OK
+T01,Gender | A man,2833,OK
+T01,Gender | A woman,4255,OK
+T01,Gender | In some other way,36*,SMALL BASE
+T01,Education | College graduate+,3440,OK
+T01,Education | Some College,2313,OK
+T01,Education | H.S. graduate or less,1359,OK
+T01,Region | Northeast,1174,OK
+T01,Region | Midwest,1591,OK
+T01,Region | South,2849,OK
+T01,Region | West,1518,OK
+T01,Income | Lower income,1646,OK
+T01,Income | Middle income,3512,OK
+T01,Income | Upper income,1593,OK
+T02,Age | 18-29,432,OK
+T02,Age | 30-49,2350,OK
+T02,Age | 50-64,2157,OK
+T02,Age | 65+,2184,OK
+T02,Gender | A man,2832,OK
+T02,Gender | A woman,4258,OK
+T02,Gender | In some other way,36*,SMALL BASE
+T02,Education | College graduate+,3438,OK
+T02,Education | Some College,2314,OK
+T02,Education | H.S. graduate or less,1360,OK
+T02,Region | Northeast,1173,OK
+T02,Region | Midwest,1589,OK
+T02,Region | South,2850,OK
+T02,Region | West,1521,OK
+T02,Income | Lower income,1650,OK
+T02,Income | Middle income,3509,OK
+T02,Income | Upper income,1592,OK
+T03,Age | 18-29,433,OK
+T03,Age | 30-49,2353,OK
+T03,Age | 50-64,2155,OK
+T03,Age | 65+,2185,OK
+T03,Gender | A man,2833,OK
+T03,Gender | A woman,4259,OK
+T03,Gender | In some other way,36*,SMALL BASE
+T03,Education | College graduate+,3437,OK
+T03,Education | Some College,2314,OK
+T03,Education | H.S. graduate or less,1365,OK
+T03,Region | Northeast,1173,OK
+T03,Region | Midwest,1590,OK
+T03,Region | South,2854,OK
+T03,Region | West,1519,OK
+T03,Income | Lower income,1648,OK
+T03,Income | Middle income,3514,OK
+T03,Income | Upper income,1593,OK
+T04,Age | 18-29,432,OK
+T04,Age | 30-49,2353,OK
+T04,Age | 50-64,2158,OK
+T04,Age | 65+,2186,OK
+T04,Gender | A man,2832,OK
+T04,Gender | A woman,4263,OK
+T04,Gender | In some other way,36*,SMALL BASE
+T04,Education | College graduate+,3438,OK
+T04,Education | Some College,2316,OK
+T04,Education | H.S. graduate or less,1365,OK
+T04,Region | Northeast,1175,OK
+T04,Region | Midwest,1591,OK
+T04,Region | South,2852,OK
+T04,Region | West,1521,OK
+T04,Income | Lower income,1654,OK
+T04,Income | Middle income,3509,OK
+T04,Income | Upper income,1594,OK
+T05,Age | 18-29,433,OK
+T05,Age | 30-49,2356,OK
+T05,Age | 50-64,2157,OK
+T05,Age | 65+,2185,OK
+T05,Gender | A man,2834,OK
+T05,Gender | A woman,4263,OK
+T05,Gender | In some other way,36*,SMALL BASE
+T05,Education | College graduate+,3442,OK
+T05,Education | Some College,2314,OK
+T05,Education | H.S. graduate or less,1365,OK
+T05,Region | Northeast,1173,OK
+T05,Region | Midwest,1590,OK
+T05,Region | South,2855,OK
+T05,Region | West,1523,OK
+T05,Income | Lower income,1654,OK
+T05,Income | Middle income,3514,OK
+T05,Income | Upper income,1592,OK
+T06,Age | 18-29,433,OK
+T06,Age | 30-49,2354,OK
+T06,Age | 50-64,2157,OK
+T06,Age | 65+,2183,OK
+T06,Gender | A man,2836,OK
+T06,Gender | A woman,4258,OK
+T06,Gender | In some other way,35*,SMALL BASE
+T06,Education | College graduate+,3441,OK
+T06,Education | Some College,2315,OK
+T06,Education | H.S. graduate or less,1361,OK
+T06,Region | Northeast,1173,OK
+T06,Region | Midwest,1592,OK
+T06,Region | South,2853,OK
+T06,Region | West,1519,OK
+T06,Income | Lower income,1652,OK
+T06,Income | Middle income,3510,OK
+T06,Income | Upper income,1593,OK
+T07,Age | 18-29,433,OK
+T07,Age | 30-49,2354,OK
+T07,Age | 50-64,2159,OK
+T07,Age | 65+,2184,OK
+T07,Gender | A man,2836,OK
+T07,Gender | A woman,4260,OK
+T07,Gender | In some other way,36*,SMALL BASE
+T07,Education | College graduate+,3443,OK
+T07,Education | Some College,2313,OK
+T07,Education | H.S. graduate or less,1365,OK
+T07,Region | Northeast,1174,OK
+T07,Region | Midwest,1591,OK
+T07,Region | South,2853,OK
+T07,Region | West,1522,OK
+T07,Income | Lower income,1652,OK
+T07,Income | Middle income,3513,OK
+T07,Income | Upper income,1594,OK
+T08,Age | 18-29,541,OK
+T08,Age | 30-49,1962,OK
+T08,Age | 50-64,1219,OK
+T08,Age | 65+,761,OK
+T08,Gender | A man,1600,OK
+T08,Gender | A woman,2835,OK
+T08,Gender | In some other way,44*,SMALL BASE
+T08,Education | College graduate+,2422,OK
+T08,Education | Some College,1329,OK
+T08,Education | H.S. graduate or less,723,OK
+T08,Region | Northeast,781,OK
+T08,Region | Midwest,849,OK
+T08,Region | South,1801,OK
+T08,Region | West,1055,OK
+T08,Income | Lower income,995,OK
+T08,Income | Middle income,2170,OK
+T08,Income | Upper income,1100,OK
+T09,Age | 18-29,541,OK
+T09,Age | 30-49,1967,OK
+T09,Age | 50-64,1216,OK
+T09,Age | 65+,767,OK
+T09,Gender | A man,1602,OK
+T09,Gender | A woman,2841,OK
+T09,Gender | In some other way,44*,SMALL BASE
+T09,Education | College graduate+,2423,OK
+T09,Education | Some College,1334,OK
+T09,Education | H.S. graduate or less,725,OK
+T09,Region | Northeast,781,OK
+T09,Region | Midwest,850,OK
+T09,Region | South,1806,OK
+T09,Region | West,1057,OK
+T09,Income | Lower income,997,OK
+T09,Income | Middle income,2172,OK
+T09,Income | Upper income,1103,OK
+T10,Age | 18-29,541,OK
+T10,Age | 30-49,1965,OK
+T10,Age | 50-64,1218,OK
+T10,Age | 65+,766,OK
+T10,Gender | A man,1600,OK
+T10,Gender | A woman,2842,OK
+T10,Gender | In some other way,44*,SMALL BASE
+T10,Education | College graduate+,2428,OK
+T10,Education | Some College,1331,OK
+T10,Education | H.S. graduate or less,722,OK
+T10,Region | Northeast,780,OK
+T10,Region | Midwest,849,OK
+T10,Region | South,1805,OK
+T10,Region | West,1059,OK
+T10,Income | Lower income,996,OK
+T10,Income | Middle income,2175,OK
+T10,Income | Upper income,1103,OK
+T11,Age | 18-29,542,OK
+T11,Age | 30-49,1967,OK
+T11,Age | 50-64,1217,OK
+T11,Age | 65+,764,OK
+T11,Gender | A man,1601,OK
+T11,Gender | A woman,2841,OK
+T11,Gender | In some other way,44*,SMALL BASE
+T11,Education | College graduate+,2427,OK
+T11,Education | Some College,1330,OK
+T11,Education | H.S. graduate or less,725,OK
+T11,Region | Northeast,781,OK
+T11,Region | Midwest,849,OK
+T11,Region | South,1804,OK
+T11,Region | West,1059,OK
+T11,Income | Lower income,997,OK
+T11,Income | Middle income,2173,OK
+T11,Income | Upper income,1102,OK
+T12,Age | 18-29,542,OK
+T12,Age | 30-49,1966,OK
+T12,Age | 50-64,1219,OK
+T12,Age | 65+,768,OK
+T12,Gender | A man,1602,OK
+T12,Gender | A woman,2845,OK
+T12,Gender | In some other way,44*,SMALL BASE
+T12,Education | College graduate+,2426,OK
+T12,Education | Some College,1334,OK
+T12,Education | H.S. graduate or less,726,OK
+T12,Region | Northeast,781,OK
+T12,Region | Midwest,850,OK
+T12,Region | South,1808,OK
+T12,Region | West,1059,OK
+T12,Income | Lower income,1001,OK
+T12,Income | Middle income,2175,OK
+T12,Income | Upper income,1102,OK
+T13,Age | 18-29,541,OK
+T13,Age | 30-49,1962,OK
+T13,Age | 50-64,1217,OK
+T13,Age | 65+,766,OK
+T13,Gender | A man,1600,OK
+T13,Gender | A woman,2838,OK
+T13,Gender | In some other way,44*,SMALL BASE
+T13,Education | College graduate+,2426,OK
+T13,Education | Some College,1329,OK
+T13,Education | H.S. graduate or less,722,OK
+T13,Region | Northeast,778,OK
+T13,Region | Midwest,849,OK
+T13,Region | South,1806,OK
+T13,Region | West,1056,OK
+T13,Income | Lower income,995,OK
+T13,Income | Middle income,2171,OK
+T13,Income | Upper income,1102,OK
+T14,Age | 18-29,543,OK
+T14,Age | 30-49,1968,OK
+T14,Age | 50-64,1219,OK
+T14,Age | 65+,765,OK
+T14,Gender | A man,1602,OK
+T14,Gender | A woman,2845,OK
+T14,Gender | In some other way,44*,SMALL BASE
+T14,Education | College graduate+,2427,OK
+T14,Education | Some College,1334,OK
+T14,Education | H.S. graduate or less,725,OK
+T14,Region | Northeast,780,OK
+T14,Region | Midwest,853,OK
+T14,Region | South,1806,OK
+T14,Region | West,1059,OK
+T14,Income | Lower income,999,OK
+T14,Income | Middle income,2173,OK
+T14,Income | Upper income,1104,OK
+T15,Age | 18-29,314,OK
+T15,Age | 30-49,1032,OK
+T15,Age | 50-64,757,OK
+T15,Age | 65+,447,OK
+T15,Gender | A man,1409,OK
+T15,Gender | A woman,1115,OK
+T15,Gender | In some other way,29**,VERY SMALL BASE
+T15,Education | College graduate+,1462,OK
+T15,Education | Some College,738,OK
+T15,Education | H.S. graduate or less,350,OK
+T15,Region | Northeast,423,OK
+T15,Region | Midwest,503,OK
+T15,Region | South,1088,OK
+T15,Region | West,540,OK
+T15,Income | Lower income,526,OK
+T15,Income | Middle income,1220,OK
+T15,Income | Upper income,717,OK
+T16,Age | 18-29,314,OK
+T16,Age | 30-49,1033,OK
+T16,Age | 50-64,752,OK
+T16,Age | 65+,450,OK
+T16,Gender | A man,1410,OK
+T16,Gender | A woman,1113,OK
+T16,Gender | In some other way,29**,VERY SMALL BASE
+T16,Education | College graduate+,1461,OK
+T16,Education | Some College,738,OK
+T16,Education | H.S. graduate or less,350,OK
+T16,Region | Northeast,422,OK
+T16,Region | Midwest,499,OK
+T16,Region | South,1091,OK
+T16,Region | West,541,OK
+T16,Income | Lower income,524,OK
+T16,Income | Middle income,1221,OK
+T16,Income | Upper income,716,OK
+T17,Age | 18-29,316,OK
+T17,Age | 30-49,1030,OK
+T17,Age | 50-64,755,OK
+T17,Age | 65+,449,OK
+T17,Gender | A man,1409,OK
+T17,Gender | A woman,1115,OK
+T17,Gender | In some other way,29**,VERY SMALL BASE
+T17,Education | College graduate+,1463,OK
+T17,Education | Some College,736,OK
+T17,Education | H.S. graduate or less,351,OK
+T17,Region | Northeast,421,OK
+T17,Region | Midwest,503,OK
+T17,Region | South,1090,OK
+T17,Region | West,540,OK
+T17,Income | Lower income,525,OK
+T17,Income | Middle income,1218,OK
+T17,Income | Upper income,718,OK
+T18,Age | 18-29,316,OK
+T18,Age | 30-49,1028,OK
+T18,Age | 50-64,755,OK
+T18,Age | 65+,447,OK
+T18,Gender | A man,1409,OK
+T18,Gender | A woman,1111,OK
+T18,Gender | In some other way,29**,VERY SMALL BASE
+T18,Education | College graduate+,1463,OK
+T18,Education | Some College,732,OK
+T18,Education | H.S. graduate or less,351,OK
+T18,Region | Northeast,422,OK
+T18,Region | Midwest,498,OK
+T18,Region | South,1091,OK
+T18,Region | West,539,OK
+T18,Income | Lower income,526,OK
+T18,Income | Middle income,1215,OK
+T18,Income | Upper income,718,OK
+T19,Age | 18-29,315,OK
+T19,Age | 30-49,1030,OK
+T19,Age | 50-64,756,OK
+T19,Age | 65+,451,OK
+T19,Gender | A man,1412,OK
+T19,Gender | A woman,1115,OK
+T19,Gender | In some other way,28**,VERY SMALL BASE
+T19,Education | College graduate+,1463,OK
+T19,Education | Some College,739,OK
+T19,Education | H.S. graduate or less,350,OK
+T19,Region | Northeast,420,OK
+T19,Region | Midwest,502,OK
+T19,Region | South,1093,OK
+T19,Region | West,541,OK
+T19,Income | Lower income,525,OK
+T19,Income | Middle income,1221,OK
+T19,Income | Upper income,719,OK
+T20,Age | 18-29,315,OK
+T20,Age | 30-49,1031,OK
+T20,Age | 50-64,757,OK
+T20,Age | 65+,449,OK
+T20,Gender | A man,1412,OK
+T20,Gender | A woman,1114,OK
+T20,Gender | In some other way,29**,VERY SMALL BASE
+T20,Education | College graduate+,1464,OK
+T20,Education | Some College,736,OK
+T20,Education | H.S. graduate or less,352,OK
+T20,Region | Northeast,422,OK
+T20,Region | Midwest,502,OK
+T20,Region | South,1091,OK
+T20,Region | West,541,OK
+T20,Income | Lower income,526,OK
+T20,Income | Middle income,1219,OK
+T20,Income | Upper income,720,OK
+T21,Age | 18-29,315,OK
+T21,Age | 30-49,1031,OK
+T21,Age | 50-64,755,OK
+T21,Age | 65+,451,OK
+T21,Gender | A man,1411,OK
+T21,Gender | A woman,1115,OK
+T21,Gender | In some other way,29**,VERY SMALL BASE
+T21,Education | College graduate+,1465,OK
+T21,Education | Some College,738,OK
+T21,Education | H.S. graduate or less,349,OK
+T21,Region | Northeast,422,OK
+T21,Region | Midwest,503,OK
+T21,Region | South,1091,OK
+T21,Region | West,540,OK
+T21,Income | Lower income,526,OK
+T21,Income | Middle income,1220,OK
+T21,Income | Upper income,719,OK
+T22,Age | 18-29,419,OK
+T22,Age | 30-49,1190,OK
+T22,Age | 50-64,670,OK
+T22,Age | 65+,266,OK
+T22,Gender | A man,786,OK
+T22,Gender | A woman,1731,OK
+T22,Gender | In some other way,32*,SMALL BASE
+T22,Education | College graduate+,1066,OK
+T22,Education | Some College,861,OK
+T22,Education | H.S. graduate or less,619,OK
+T22,Region | Northeast,387,OK
+T22,Region | Midwest,481,OK
+T22,Region | South,1220,OK
+T22,Region | West,464,OK
+T22,Income | Lower income,832,OK
+T22,Income | Middle income,1149,OK
+T22,Income | Upper income,461,OK
+T23,Age | 18-29,420,OK
+T23,Age | 30-49,1192,OK
+T23,Age | 50-64,670,OK
+T23,Age | 65+,266,OK
+T23,Gender | A man,788,OK
+T23,Gender | A woman,1732,OK
+T23,Gender | In some other way,32*,SMALL BASE
+T23,Education | College graduate+,1066,OK
+T23,Education | Some College,864,OK
+T23,Education | H.S. graduate or less,619,OK
+T23,Region | Northeast,388,OK
+T23,Region | Midwest,482,OK
+T23,Region | South,1221,OK
+T23,Region | West,464,OK
+T23,Income | Lower income,834,OK
+T23,Income | Middle income,1152,OK
+T23,Income | Upper income,459,OK
+T24,Age | 18-29,420,OK
+T24,Age | 30-49,1192,OK
+T24,Age | 50-64,671,OK
+T24,Age | 65+,264,OK
+T24,Gender | A man,789,OK
+T24,Gender | A woman,1730,OK
+T24,Gender | In some other way,32*,SMALL BASE
+T24,Education | College graduate+,1066,OK
+T24,Education | Some College,863,OK
+T24,Education | H.S. graduate or less,619,OK
+T24,Region | Northeast,387,OK
+T24,Region | Midwest,482,OK
+T24,Region | South,1221,OK
+T24,Region | West,464,OK
+T24,Income | Lower income,834,OK
+T24,Income | Middle income,1149,OK
+T24,Income | Upper income,461,OK
+T25,Age | 18-29,419,OK
+T25,Age | 30-49,1192,OK
+T25,Age | 50-64,671,OK
+T25,Age | 65+,265,OK
+T25,Gender | A man,788,OK
+T25,Gender | A woman,1731,OK
+T25,Gender | In some other way,32*,SMALL BASE
+T25,Education | College graduate+,1066,OK
+T25,Education | Some College,864,OK
+T25,Education | H.S. graduate or less,618,OK
+T25,Region | Northeast,387,OK
+T25,Region | Midwest,481,OK
+T25,Region | South,1222,OK
+T25,Region | West,464,OK
+T25,Income | Lower income,835,OK
+T25,Income | Middle income,1149,OK
+T25,Income | Upper income,461,OK
+T26,Age | 18-29,420,OK
+T26,Age | 30-49,1189,OK
+T26,Age | 50-64,669,OK
+T26,Age | 65+,266,OK
+T26,Gender | A man,787,OK
+T26,Gender | A woman,1729,OK
+T26,Gender | In some other way,32*,SMALL BASE
+T26,Education | College graduate+,1066,OK
+T26,Education | Some College,862,OK
+T26,Education | H.S. graduate or less,617,OK
+T26,Region | Northeast,387,OK
+T26,Region | Midwest,480,OK
+T26,Region | South,1220,OK
+T26,Region | West,464,OK
+T26,Income | Lower income,833,OK
+T26,Income | Middle income,1148,OK
+T26,Income | Upper income,461,OK
+T27,Age | 18-29,420,OK
+T27,Age | 30-49,1189,OK
+T27,Age | 50-64,671,OK
+T27,Age | 65+,267,OK
+T27,Gender | A man,788,OK
+T27,Gender | A woman,1731,OK
+T27,Gender | In some other way,32*,SMALL BASE
+T27,Education | College graduate+,1066,OK
+T27,Education | Some College,864,OK
+T27,Education | H.S. graduate or less,618,OK
+T27,Region | Northeast,388,OK
+T27,Region | Midwest,482,OK
+T27,Region | South,1221,OK
+T27,Region | West,463,OK
+T27,Income | Lower income,832,OK
+T27,Income | Middle income,1152,OK
+T27,Income | Upper income,461,OK
+T28,Age | 18-29,419,OK
+T28,Age | 30-49,1191,OK
+T28,Age | 50-64,669,OK
+T28,Age | 65+,266,OK
+T28,Gender | A man,788,OK
+T28,Gender | A woman,1729,OK
+T28,Gender | In some other way,32*,SMALL BASE
+T28,Education | College graduate+,1065,OK
+T28,Education | Some College,862,OK
+T28,Education | H.S. graduate or less,619,OK
+T28,Region | Northeast,387,OK
+T28,Region | Midwest,482,OK
+T28,Region | South,1221,OK
+T28,Region | West,462,OK
+T28,Income | Lower income,832,OK
+T28,Income | Middle income,1150,OK
+T28,Income | Upper income,460,OK
