@@ -4,6 +4,12 @@ Independent survey-tabulation portfolio project using Pew Research Center Americ
 
 > This is an independent portfolio analysis, not an official Pew Research Center analysis. Platform results describe different platform-specific or routed respondent universes, so cross-platform comparisons are descriptive.
 
+## Final Tab Book Preview
+
+![Representative view of the final Excel tab book](assets/tab-book-preview.png)
+
+*Representative view of the final weighted Excel tab book, showing demographic banners, unweighted bases, weighted percentages, significance letters, and small-base notation.*
+
 ## Quick Access
 
 - **[Open the Final Excel Tab Book](output/tab_books/Reach3_Social_Media_TabBook.xlsx)** — 28 weighted cross-tabulations with demographic banners, significance letters, and small-base flags
