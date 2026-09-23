@@ -27,6 +27,12 @@ How do social-media usage motivations differ across Facebook, Instagram, X, and 
 
 Platform profiles are compared descriptively because they use different platform-specific or routed respondent universes. Statistical testing is performed across demographic categories within a platform, not as a formal cross-platform test.
 
+## Survey Tabulation Pipeline
+
+![End-to-end survey tabulation pipeline](assets/survey-tabulation-pipeline.png)
+
+*End-to-end workflow from raw survey microdata through validation, analytical universes, weighting, cross-tabulation, statistical testing, QA, and final Excel delivery.*
+
 ## Key Findings
 
 - On Facebook, 74.8% selected keeping up with friends and family as a major reason for using the platform.
