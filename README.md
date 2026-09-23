@@ -13,6 +13,7 @@ Independent survey-tabulation portfolio project using Pew Research Center Americ
 ## Quick Access
 
 - **[Open the Final Excel Tab Book](output/tab_books/Reach3_Social_Media_TabBook.xlsx)** — 28 weighted cross-tabulations with demographic banners, significance letters, and small-base flags
+- **[Portfolio Case Study (PDF)](output/reports/Social_Media_Survey_Tabulation_Case_Study.pdf)** — concise project overview, findings, methodology, and QA
 - **[Read the Methodology](documentation/methodology.md)** — analytical universes, weighting, effective bases, significance testing, and QA
 - **[Follow the Technical Workflow](documentation/workflow.md)** — six-stage pipeline, run instructions, output structure, and implementation QA
 - **[Review the Tabulation Plan](tabulation/tabulation_plan.csv)** — table-level outcomes, universes, weights, banners, and display specifications
